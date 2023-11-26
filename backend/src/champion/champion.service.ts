@@ -130,6 +130,26 @@ export class ChampionService extends AbstractService {
     }
   }
 
+  // Make it so we can save all of the champion patches at the same time.
+  async initializeChampionPatchData( patchVersion: string) {
+    try {
+      // Get all champions from the database
+      const champions = await this.championRepository.find();
+  
+      // Iterate through champions and save patch data for each champion
+      await Promise.all(
+        champions.map(async (champion) => {
+          await this.saveChampionPatchData(patchVersion, champion.key);
+        })
+      );
+  
+      console.log(`ChampionPatch data for all champions and patch ${patchVersion} saved successfully.`);
+    } catch (error) {
+      console.error(`Error initializing ChampionPatch data for all champions and patch ${patchVersion}:`, error.message);
+      throw error;
+    }
+  }
+
   //TODO: Make it so we can save all of the champions at the same time.
   async saveChampionPatchData(
     patchVersion: string,
@@ -238,24 +258,24 @@ export class ChampionService extends AbstractService {
     tolerance: number = 0.0001,
   ): Promise<SpellDifference[]> {
     const differences: SpellDifference[] = [];
-  
+
     const areNumbersEqual = (num1: number, num2: number): boolean => {
       return Math.abs(num1 - num2) < tolerance;
     };
-  
+
     const compareObjects = (obj1: any, obj2: any): SpellDifference | null => {
       const diff: SpellDifference = {
         spellKey: obj1.spellKey,
         changes: [],
       };
-  
+
       const keys1 = Object.keys(obj1);
       const keys2 = Object.keys(obj2);
-  
+
       for (const key of keys1) {
         const val1 = obj1[key];
         const val2 = obj2[key];
-  
+
         if (typeof val1 === 'object' && typeof val2 === 'object') {
           const nestedDiff = compareObjects(val1, val2);
           if (nestedDiff) {
@@ -285,10 +305,10 @@ export class ChampionService extends AbstractService {
           });
         }
       }
-  
+
       return diff.changes.length > 0 ? diff : null;
     };
-  
+
     for (const [index, spell] of oldSpell.entries()) {
       const spellDifferences = compareObjects(spell, newSpell[index]);
       if (spellDifferences) {
@@ -298,11 +318,9 @@ export class ChampionService extends AbstractService {
         });
       }
     }
-  
+
     return differences;
   }
-y  
-  
 
   /* ~~~~~~~~~~~~~~~ ||  END || ~~~~~~~~~~~~~~~~~~~~~~~ */
 }

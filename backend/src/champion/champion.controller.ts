@@ -35,6 +35,21 @@ export class ChampionController {
     }
   }
 
+  @Get('initialiteChampionPatch/:patchVersion')
+  async saveChampionPatchData1(
+    @Param('patchVersion') patchVersion: string,
+  ): Promise<void> {
+    try {
+      await this.championService.initializeChampionPatchData(patchVersion);
+    } catch (error) {
+      console.error(
+        'Error saving or fetching ChampionPatch data:',
+        error.message,
+      );
+      throw error;
+    }
+  }
+
   @Get(':patchVersion/:championId')
   async saveChampionPatchData(
     @Param('patchVersion') patchVersion: string,
@@ -131,20 +146,5 @@ export class ChampionController {
     return this.championService.compareSpells(spellPatch1, spellPatch2);
   }
 
-  /*
-  @Get(':championId/compare')
-  async compareChampionPatches(
-      @Param('patchVersion1') patchVersion1: string,
-      @Param('patchVersion2') patchVersion2: string,
-      @Param('championId') championId: string,
-  ): Promise<any> {
-      try {
-          const differences = await this.championService.getAndCompareChampionSpellsForPatch(patchVersion1, patchVersion2, championId);
-          return differences;
-      } catch (error) {
-          throw error; // Handle the error appropriately, e.g., return a custom error response
-      }
-  }
-*/
   /* ~~~~~~~~~~~~~~~ || END || ~~~~~~~~~~~~~~~~~~~~~~~ */
 }
